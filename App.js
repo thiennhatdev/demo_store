@@ -5,8 +5,9 @@
  * @format
  */
 
-import React from 'react';
+import React, { createContext, useMemo, useState } from 'react';
 import {
+  Dimensions,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -29,6 +30,9 @@ import Top from './components/Top';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './Screens/Home';
+import BarCodeScanner from './components/BarCodeScanner';
+
+const windowHeight = Dimensions.get('window').height;
 
 
 function ReportScreen() {
@@ -54,66 +58,82 @@ function SettingScreen() {
     </View>
   );
 }
-function Section({children, title}) {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+
 
 const Tab = createBottomTabNavigator();
 
+export const AppContext = createContext({
+  isShowCameraScan: false,
+  setIsShowCameraScan: () => { },
+  dataBarCode: null,
+  setDataBarCode: () => { },
+})
+
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
+  const [isShowCameraScan, setIsShowCameraScan] = useState(false);
+  const [dataBarCode, setDataBarCode ] = useState(null);
+
+  const value = useMemo(
+    () => ({ isShowCameraScan, setIsShowCameraScan, dataBarCode, setDataBarCode }),
+    [isShowCameraScan, dataBarCode]
+  );
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          tabBarIconStyle: {
-            display: "none"
-          },
-          tabBarLabelStyle: {
-            fontSize: 14,
-            textAlignVertical: "center",
-            height: "100%",
-            fontWeight: "bold"
-          }
-          })}
-      >
-        <Tab.Screen name="CỬA HÀNG" component={Home} />
-        <Tab.Screen name="CHẤT LƯỢNG" component={QualityScreen} />
-        <Tab.Screen name="BÁO CÁO" component={ReportScreen} />
-        <Tab.Screen name="CÀI ĐẶT" component={SettingScreen} />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <AppContext.Provider value={value}>
+      {
+        !isShowCameraScan ?
+          <NavigationContainer >
+            <Tab.Navigator
+              screenOptions={({ route }) => ({
+                tabBarIconStyle: {
+                  display: "none"
+                },
+                tabBarLabelStyle: {
+                  fontSize: 14,
+                  textAlignVertical: "center",
+                  height: "100%",
+                  fontWeight: "bold"
+                },
+                tabBarStyle: {
+                  // position: "absolute",
+                  // zIndex: 0,
+                  // height: 0
+                  // display: "none"
+                }
+              })}
+            >
+              <Tab.Screen name="CỬA HÀNG" component={Home} />
+              <Tab.Screen name="CHẤT LƯỢNG" component={QualityScreen} />
+              <Tab.Screen name="BÁO CÁO" component={ReportScreen} />
+              <Tab.Screen name="CÀI ĐẶT" component={SettingScreen} />
+            </Tab.Navigator>
+          </NavigationContainer>
+          : <View style={styles.wrapCamera}>
+            <BarCodeScanner />
+            </View>
+      }
+
+    </AppContext.Provider>
+
   );
 }
 
 const styles = StyleSheet.create({
+  wrapCamera: {
+    height: windowHeight,
+    width: "100%",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 9999,
+    backgroundColor: "black"
+},
   sectionContainer: {
     marginTop: 32,
     paddingHorizontal: 24,

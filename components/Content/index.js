@@ -5,30 +5,39 @@ import { TabView, SceneMap } from 'react-native-tab-view';
 
 const data = [
     {   
+        key: 1,
         label: "điện máy gia dụng"
     },
     {
+        key: 2,
         label: "thực phẩm"
     },
     {
+        key: 3,
         label: "thiết bị điện"
     },
     {
+        key: 4,
         label: "thiết bị công nghiệp"
     },
     {
+        key: 5,
         label: "thiết bị nông nghiệp"
     },
     {
+        key: 6,
         label: "thiết bị y tế"
     },
     {
+        key: 7,
         label: "quần áo"
     },
     {
+        key: 8,
         label: "giày dép"
     },
     {
+        key: 9,
         label: "thiết bị di động"
     }
 ]
@@ -104,7 +113,7 @@ const Content = () => {
                     horizontal={true}
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
-                    keyExtractor={item => item.index}
+                    keyExtractor={(item) => item.key}
                     data={data}
                     renderItem={({ item, index }) => {
                         return <Hexagon key={index} text={item.label} />
